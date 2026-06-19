@@ -113,7 +113,40 @@
   .nav__links{ display:flex; align-items:center; gap:26px; }
   .nav__links a{ font-size:13px; font-weight:600; letter-spacing:1.4px; text-transform:uppercase; color:#BBB0D4; transition:color .2s; white-space:nowrap; }
   .nav__links a:hover{ color:var(--lilac); }
-  .nav__burger{ display:none; background:none; border:1px solid var(--line-2); color:var(--ink); border-radius:10px; padding:10px 14px; font-size:12px; letter-spacing:1.4px; text-transform:uppercase; font-weight:700; cursor:pointer; }
+  .nav__cta{ display:inline-flex; }
+  .nav__burger{
+    display:none; position:relative; width:46px; height:42px; border-radius:11px;
+    background:rgba(255,255,255,.03); border:1px solid var(--line-2); cursor:pointer;
+    padding:0; z-index:62;
+  }
+  .nav__burger span{
+    position:absolute; left:50%; top:50%; width:20px; height:2px; border-radius:2px;
+    background:var(--ink); transform:translate(-50%,-50%);
+    transition:transform .26s ease, opacity .2s ease;
+  }
+  .nav__burger span:nth-child(1){ transform:translate(-50%,-7px); }
+  .nav__burger span:nth-child(3){ transform:translate(-50%,5px); }
+  .nav__burger.open span:nth-child(1){ transform:translate(-50%,-50%) rotate(45deg); }
+  .nav__burger.open span:nth-child(2){ opacity:0; }
+  .nav__burger.open span:nth-child(3){ transform:translate(-50%,-50%) rotate(-45deg); }
+
+  /* mobile slide-down menu */
+  .nav__mobile{
+    position:fixed; left:0; right:0; top:88px; z-index:59;
+    background:rgba(16,11,34,.97); backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--line-2);
+    padding:14px 0 26px;
+    transform:translateY(-12px); opacity:0; visibility:hidden; pointer-events:none;
+    transition:opacity .24s ease, transform .24s ease, visibility .24s;
+    max-height:calc(100vh - 88px); overflow-y:auto;
+  }
+  .nav__mobile.open{ transform:translateY(0); opacity:1; visibility:visible; pointer-events:auto; }
+  .nav__mobile a{
+    display:block; padding:16px 4px; font-size:15px; font-weight:600; letter-spacing:1.2px;
+    text-transform:uppercase; color:#CFC6E2; border-bottom:1px solid var(--line);
+  }
+  .nav__mobile a:last-of-type{ border-bottom:0; }
+  .nav__mobile .btn{ width:100%; margin-top:18px; }
 
   /* ───────── HERO ───────── */
   .hero{ position:relative; overflow:hidden; padding:118px 0 130px; }
@@ -341,6 +374,7 @@
   /* ───────── RESPONSIVE ───────── */
   @media (max-width:1080px){
     .nav__links{ display:none; }
+    .nav__cta{ display:none; }
     .nav__burger{ display:inline-block; }
     .dots{ display:none; }
   }
@@ -349,14 +383,29 @@
     .sauce__grid,.inv__grid,.touch__grid{ grid-template-columns:1fr; gap:44px; }
     .ccard{ flex-wrap:wrap; }
     .sauce__media{ order:-1; }
+    .hero__orb{ display:none; }
+    .hero__sub{ max-width:100%; }
+    .hero__in{ max-width:100%; }
   }
   @media (max-width:560px){
-    .wrap{ padding:0 22px; }
-    .hero{ padding:80px 0 90px; }
-    .sec{ padding:84px 0; }
+    .wrap{ padding:0 20px; }
+    .nav__in{ height:72px; }
+    .nav__logo{ height:28px; }
+    .nav__mobile{ top:76px; max-height:calc(100vh - 76px); }
+    .hero{ padding:64px 0 76px; }
+    .hero h1{ font-size:clamp(38px,11vw,60px); }
+    .sec{ padding:72px 0; }
+    .sec__top{ margin-bottom:44px; }
     .form__row{ grid-template-columns:1fr; }
     .ra__card{ padding:54px 28px; }
     .inv__panel{ padding:32px 26px; }
+    .form{ padding:28px 22px; }
+    .sauce__flow{ position:static; max-width:100%; margin-top:16px; right:0; bottom:0; }
+    .btn{ padding:15px 24px; font-size:12.5px; }
+    .hero__cta{ gap:12px; }
+    .hero__cta .btn{ flex:1 1 auto; }
+    .dep__name{ font-size:28px; }
+    .feat__rn{ top:22px; right:24px; }
   }
   @media (prefers-reduced-motion: reduce){ *{ animation:none !important; } }
 </style>
@@ -376,8 +425,17 @@
         <a href="#features">Features &amp; Functionality</a>
         <a href="#sauce">Our Secret Sauce</a>
       </nav>
-      <a class="btn btn--ghost" href="#touch">Get in Touch</a>
-      <button class="nav__burger" onclick="document.getElementById('touch').scrollIntoView()">Menu</button>
+      <a class="btn btn--ghost nav__cta" href="#touch">Get in Touch</a>
+      <button class="nav__burger" id="navBurger" aria-label="Open menu" aria-expanded="false" aria-controls="navMobile">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="wrap nav__mobile" id="navMobile">
+      <a href="#what">What is an Avatar?</a>
+      <a href="#deployments">Recent Deployments</a>
+      <a href="#features">Features &amp; Functionality</a>
+      <a href="#sauce">Our Secret Sauce</a>
+      <a class="btn btn--primary" href="#touch">Get in Touch →</a>
     </div>
   </header>
 
@@ -568,7 +626,7 @@
           <div class="field"><label>Email*</label><input type="email" name="email" placeholder="you@company.com" required /></div>
           <div class="field"><label>What would your avatar do?</label><textarea name="Message" rows="3" placeholder="Greet visitors, answer FAQs, route leads…"></textarea></div>
           <button class="btn btn--primary" type="submit">Submit →</button>
-          <p class="form__fine" id="esd-form-msg">Submissions are routed to <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="147d7a727b54717562716770667b647d7a773a777b79">[email&#160;protected]</a>.</p>
+          <p class="form__fine" id="esd-form-msg">Submissions are routed to <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="81e8efe7eec1e4e0f7e4f2e5f3eef1e8efe2afe2eeec">[email&#160;protected]</a>.</p>
         </form>
       </div>
     </div>
@@ -603,7 +661,7 @@
 
   <!-- CONSENT BAR -->
   <div class="consent" id="consent">
-    <p>By viewing this demo, Eavesdrop may contact you about the products and services shown. You can opt out anytime by emailing <a href="/cdn-cgi/l/email-protection#9bf2f5fdf4dbfefaedfee8ffe9f4ebf2f5f8b5f8f4f6"><span class="__cf_email__" data-cfemail="2e474048416e4b4f584b5d4a5c415e47404d004d4143">[email&#160;protected]</span></a> or clicking “unsubscribe” in any message.</p>
+    <p>By viewing this demo, Eavesdrop may contact you about the products and services shown. You can opt out anytime by emailing <a href="/cdn-cgi/l/email-protection#dbb2b5bdb49bbebaadbea8bfa9b4abb2b5b8f5b8b4b6"><span class="__cf_email__" data-cfemail="60090e060f20050116051304120f10090e034e030f0d">[email&#160;protected]</span></a> or clicking “unsubscribe” in any message.</p>
     <div class="consent__btns">
       <button class="ok" onclick="esdConsent()">Got it</button>
       <button class="no" onclick="esdConsent()">Dismiss</button>
@@ -661,6 +719,26 @@
       if(el){ e.preventDefault(); window.scrollTo({ top: el.offsetTop - 70, behavior:'smooth' }); }
     });
   });
+
+  // mobile hamburger menu
+  var burger = document.getElementById('navBurger');
+  var mobile = document.getElementById('navMobile');
+  function closeMenu(){
+    if(!burger||!mobile) return;
+    burger.classList.remove('open'); mobile.classList.remove('open');
+    burger.setAttribute('aria-expanded','false'); burger.setAttribute('aria-label','Open menu');
+  }
+  if(burger && mobile){
+    burger.addEventListener('click', function(){
+      var open = burger.classList.toggle('open');
+      mobile.classList.toggle('open', open);
+      burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    });
+    mobile.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', closeMenu); });
+    // close if resized up to desktop
+    window.addEventListener('resize', function(){ if(window.innerWidth > 1080) closeMenu(); });
+  }
 })();
 
 // ── Contact form → routes submissions to info@eavesdropinc.com (FormSubmit) ──
